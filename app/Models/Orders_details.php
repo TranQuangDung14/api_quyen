@@ -19,6 +19,15 @@ class Orders_details extends Model
     {
         return $this->belongsTo(Product::class);
     }
+    public function size()
+    {
+        return $this->belongsTo(Product_size::class, 'size_id');
+    }
+
+    public function color()
+    {
+        return $this->belongsTo(Product_color::class, 'color_id');
+    }
     /**
      * The attributes that are mass assignable.
      *
@@ -30,6 +39,8 @@ class Orders_details extends Model
         'price',
         'quantity',
         'discout',
+        'color_id',
+        'size_id'
         // 'status',
     ];
 }

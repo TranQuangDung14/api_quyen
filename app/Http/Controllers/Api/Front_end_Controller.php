@@ -29,6 +29,8 @@ class Front_end_Controller extends Controller
 
         // $baseUrl = env('APP_URL') . '/';
         $product = Product::with([
+            'sizes',
+            'colors',
             'category',
             'images' => function ($query) {
                 $query->select('image', 'product_id')->orderBy('product_id')->distinct();
@@ -163,6 +165,8 @@ class Front_end_Controller extends Controller
     public function show($id)
     {
         $product = Product::with([
+            'sizes',
+            'colors',
             'category',
             'images' => function ($query) {
                 $query->select('image', 'product_id')->orderBy('product_id')->distinct();

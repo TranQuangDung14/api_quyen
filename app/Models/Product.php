@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Product extends Model
 {
     use HasFactory;
-    protected $table='da5_product';
+    protected $table = 'da5_product';
 
     public function images()
     {
@@ -21,19 +21,28 @@ class Product extends Model
     }
     public function category()
     {
-        return $this->belongsTo(Category_product::class,'category_id');
+        return $this->belongsTo(Category_product::class, 'category_id');
     }
     public function cartDetails()
     {
-        return $this->hasMany(Carts_details::class,'product_id');
+        return $this->hasMany(Carts_details::class, 'product_id');
     }
     public function orderDetails()
     {
-        return $this->hasMany(Carts_details::class,'product_id');
+        return $this->hasMany(Orders_details::class, 'product_id');
     }
     public function brand()
     {
         return $this->belongsTo(Brands::class);
+    }
+    public function sizes()
+    {
+        return $this->hasMany(Product_size::class,'product_id');
+    }
+
+    public function colors()
+    {
+        return $this->hasMany(Product_color::class,'product_id');
     }
     /**
      * The attributes that are mass assignable.

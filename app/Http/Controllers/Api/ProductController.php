@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\UploadController;
 use App\Models\Brands;
 use App\Models\Image;
+use App\Models\Product_color;
+use App\Models\Product_size;
 use Exception;
 use Illuminate\Support\Str;
 
@@ -31,13 +33,15 @@ class ProductController extends Controller
     {
         try {
             $product = Product::with([
+                'sizes',
+                'colors',
                 'category',
                 'images' => function ($query) {
                     $query->select('image', 'product_id')->orderBy('product_id')->distinct();
                 },
                 'brand',
             ])
-                ->select(['id', 'name', 'quantity', 'default_price', 'category_id', 'brand_id','status'])
+                ->select(['id', 'name', 'quantity', 'default_price', 'category_id', 'brand_id', 'status'])
                 ->orderBy('id', 'desc')
                 ->get();
             // dd($product);
@@ -85,39 +89,115 @@ class ProductController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
+    // public function store(Request $request)
+    // {
+    //     $input = $request->all();
+    //     $rules = array(
+    //         'name' => 'required',
+    //         'default_price' => 'required',
+    //         // 'price' => 'required',
+    //     );
+    //     $messages = array(
+    //         'name.required' => 'Tên  không được phép trống!',
+    //         'default_price.required' => 'Giá tiền mặc định không được phép trống!',
+    //         // 'price.required' => 'Giá tiền không được phép trống!',
+    //     );
+    //     $validator = Validator::make($input, $rules, $messages);
+    //     // $baseUrl = env('APP_URL') . '/';
+    //     if ($validator->fails()) {
+    //         return response()->json(['error' => $validator->errors()], 404);
+    //     }
+
+    //     DB::beginTransaction();
+    //     try {
+    //         // return $result;
+    //         $product = new Product();
+    //         $product->category_id =  (!empty($request->category_id)) ? $request->category_id : null;
+    //         $product->brand_id =  (!empty($request->brand_id)) ? $request->brand_id : null;
+    //         $product->name = $request->name;
+    //         $product->default_price = $request->default_price;
+    //         $product->tech_specs =  (!empty($request->tech_specs)) ? $request->tech_specs : null;
+    //         // $product->price =  (!empty($request->price)) ? $request->price : null;
+    //         $product->description =  (!empty($request->description)) ? $request->description : null;
+    //         $product->quantity = 0;
+    //         $product->save();
+
+
+    //         if ($request->hasFile('image')) {
+    //             $images = $request->file('image');
+    //             foreach ($images as $image) {
+    //                 // Kiểm tra file có phải là ảnh và dung lượng không quá giới hạn cho phép
+    //                 if ($image->isValid() && in_array($image->getClientOriginalExtension(), ['jpg', 'jpeg', 'png', 'gif']) && $image->getSize() <= 5048000) {
+    //                     // chuỗi đặt tên file ảnh
+    //                     $filename = time() . '-' . Str::slug($image->getClientOriginalName(), '-') . '.' . $image->getClientOriginalExtension();
+    //                     // Lưu ảnh vào thư mục image/product
+    //                     $image->storeAs('image/product', $filename);
+
+    //                     // Thêm bản ghi vào bảng images
+    //                     Image::create([
+    //                         'product_id' => $product->id,
+    //                         'image' => $filename,
+    //                     ]);
+    //                 }
+    //             }
+    //         }
+    //         // $image = new
+    //         DB::commit();
+    //         return response()->json([
+    //             'messege' => $product,
+    //         ], 200);
+    //     } catch (\Exception $e) {
+    //         DB::rollback();
+    //         dd($e);
+    //         return response()->json([
+    //             'messege' => 'Thất bại!',
+    //         ], 200);
+    //     }
+    // }
     public function store(Request $request)
     {
         $input = $request->all();
         $rules = array(
             'name' => 'required',
             'default_price' => 'required',
-            // 'price' => 'required',
+            'sizes' => 'required|array',
+            'colors' => 'required|array',
         );
         $messages = array(
-            'name.required' => 'Tên  không được phép trống!',
+            'name.required' => 'Tên không được phép trống!',
             'default_price.required' => 'Giá tiền mặc định không được phép trống!',
-            // 'price.required' => 'Giá tiền không được phép trống!',
+            'sizes.required' => 'Size không được phép trống!',
+            'colors.required' => 'Màu sắc không được phép trống!',
         );
         $validator = Validator::make($input, $rules, $messages);
-        // $baseUrl = env('APP_URL') . '/';
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()], 404);
         }
 
         DB::beginTransaction();
         try {
-            // return $result;
             $product = new Product();
             $product->category_id =  (!empty($request->category_id)) ? $request->category_id : null;
             $product->brand_id =  (!empty($request->brand_id)) ? $request->brand_id : null;
             $product->name = $request->name;
             $product->default_price = $request->default_price;
             $product->tech_specs =  (!empty($request->tech_specs)) ? $request->tech_specs : null;
-            // $product->price =  (!empty($request->price)) ? $request->price : null;
             $product->description =  (!empty($request->description)) ? $request->description : null;
             $product->quantity = 0;
             $product->save();
+            foreach ($request->sizes as $size) {
+                $productSize = new Product_size();
+                $productSize->product_id = $product->id;
+                $productSize->size = $size;
+                $productSize->save();
+            }
 
+            foreach ($request->colors as $color) {
+                $productColor = new Product_color();
+                $productColor->product_id = $product->id;
+                $productColor->color = $color;
+                $productColor->save();
+            }
 
             if ($request->hasFile('image')) {
                 $images = $request->file('image');
@@ -137,12 +217,7 @@ class ProductController extends Controller
                     }
                 }
             }
-            // $warehouse = new Warehouse();
-            // $warehouse->product_id = $product->id;
-            // // $warehouse->amount = $request->amount;
-            // $warehouse->save();
 
-            // $image = new
             DB::commit();
             return response()->json([
                 'messege' => $product,
@@ -155,6 +230,7 @@ class ProductController extends Controller
             ], 200);
         }
     }
+
     //
 
     /**
@@ -166,7 +242,7 @@ class ProductController extends Controller
     public function show($id)
     {
         try {
-            $product = Product::with(['images', 'category'])->findOrFail($id);
+            $product = Product::with(['images', 'category','colors','sizes'])->findOrFail($id);
             $product_related = Product::with(['images', 'category'])->where('category_id', $product->category_id)->whereNotIn('id', [$id])->get();
             $images = $product->images;
             return response()->json([
@@ -288,6 +364,15 @@ class ProductController extends Controller
         DB::beginTransaction();
         try {
             $product = Product::findOrFail($id);
+            // Delete product sizes
+            foreach ($product->sizes as $size) {
+                $size->delete();
+            }
+
+            // Delete product colors
+            foreach ($product->colors as $color) {
+                $color->delete();
+            }
 
             // Xóa các ảnh sản phẩm
             foreach ($product->images as $image) {

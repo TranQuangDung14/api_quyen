@@ -20,6 +20,8 @@ class CreateDa5OrderDetailsTable extends Migration
             $table->decimal('price', 10, 2)->default(0)->nullable();
             $table->integer("quantity")->unsigned()->nullable();
             $table->string("discout",200)->nullable();
+            $table->integer("size_id")->unsigned()->nullable();
+            $table->integer("color_id")->unsigned()->nullable();
             // $table->integer("status")->default(1);
             // $table->string("discout",200)->nullable();
             $table->timestamps();

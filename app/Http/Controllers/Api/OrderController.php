@@ -28,7 +28,11 @@ class OrderController extends Controller
     {
         // dd('day r');
         try {
-            $order = Order::with('orderDetails.product.images')->orderBy('id','desc')->get();
+            $order = Order::with(
+                'orderDetails.product.images',
+                'orderDetails.color',
+                'orderDetails.size'
+            )->orderBy('id', 'desc')->get();
             //
             return response()->json([
                 'data' => $order,
@@ -67,7 +71,7 @@ class OrderController extends Controller
                 'message' => 'Cập nhật trạng thái đơn hàng thành công'
             ]);
         } catch (\Exception $e) {
-            dd('aadđaa',$e);
+            dd('aadđaa', $e);
         }
     }
 
@@ -75,7 +79,11 @@ class OrderController extends Controller
     {
 
         try {
-            $order = Order::with('orderDetails.product.images')->findOrFail($id);
+            $order = Order::with(
+                'orderDetails.product.images',
+                'orderDetails.color',
+                'orderDetails.size'
+            )->findOrFail($id);
             //
             return response()->json([
                 'data' => $order,
@@ -154,6 +162,8 @@ class OrderController extends Controller
                 Orders_details::create([
                     'order_id' => $order->id,
                     'product_id' => $cartDetail->product_id,
+                    'size_id' => $cartDetail->size_id,
+                    'color_id' => $cartDetail->color_id,
                     'price' => $cartDetail->price_by_quantity,
                     'quantity' => $cartDetail->quantity,
                     'discount' => $cartDetail->discount,
@@ -191,7 +201,11 @@ class OrderController extends Controller
                 ]);
             }
             $sortedOrder = $order->where('status', $status)->sortByDesc('id')->values();
-            $sortedOrder->load('orderDetails.product.images');
+            $sortedOrder->load(
+                'orderDetails.product.images',
+                'orderDetails.color',
+                'orderDetails.size'
+            );
             return response()->json($sortedOrder);
         } catch (\Exception $e) {
             dd($e);

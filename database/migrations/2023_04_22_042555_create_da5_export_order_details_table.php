@@ -19,6 +19,8 @@ class CreateDa5ExportOrderDetailsTable extends Migration
             $table->integer("product_id")->unsigned()->nullable();
             $table->integer("quantity")->unsigned()->nullable();
             $table->integer("price")->unsigned()->nullable();
+            $table->integer("size_id")->unsigned()->nullable();
+            $table->integer("color_id")->unsigned()->nullable();
             $table->timestamps();
         });
     }

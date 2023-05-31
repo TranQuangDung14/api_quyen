@@ -56,6 +56,44 @@ class Import_OrdersController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
+    // public function store(Request $request)
+    // {
+    //     DB::beginTransaction();
+    //     try {
+    //         $importOrder = new Import_orders();
+    //         $importOrder->staff_id =  $request->user()->id;
+    //         $importOrder->supplier_id =  $request->supplier_id;
+    //         $importOrder->save();
+
+    //         $product = Product::where('id', $request->product_id)->first();
+
+    //         // if ($product) {
+    //         $importOrderDetail = new Import_orders_details();
+    //         $importOrderDetail->import_order_id = $importOrder->id;
+    //         $importOrderDetail->product_id = $product->id;
+    //         $importOrderDetail->quantity = $request->quantity;
+    //         $importOrderDetail->price = $request->price;
+    //         $importOrderDetail->save();
+
+    //         // Update product quantity
+    //         $product->quantity += $request->quantity;
+    //         $product->save();
+
+    //         // Update total quantity of the import order
+    //         $importOrder->total_quantity += $request->quantity;
+    //         $importOrder->total_cost = ($request->quantity)*($request->price);
+    //         $importOrder->save();
+    //         DB::commit();
+    //         return response()->json(['message' => 'Nhập kho thành công']);
+
+    //     } catch (\Exception $e) {
+    //         //throw $th;
+    //         DB::rollback();
+    //         return response()->json([
+    //             'message' => 'Hỏng rồi! Khôn lên'
+    //         ]);
+    //     }
+    // }
     public function store(Request $request)
     {
         DB::beginTransaction();
@@ -73,6 +111,8 @@ class Import_OrdersController extends Controller
             $importOrderDetail->product_id = $product->id;
             $importOrderDetail->quantity = $request->quantity;
             $importOrderDetail->price = $request->price;
+            $importOrderDetail->size_id = $request->size_id;
+            $importOrderDetail->color_id = $request->color_id;
             $importOrderDetail->save();
 
             // Update product quantity
@@ -94,7 +134,6 @@ class Import_OrdersController extends Controller
             ]);
         }
     }
-
     /**
      * Display the specified resource.
      *
